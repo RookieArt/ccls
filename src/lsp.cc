@@ -118,8 +118,12 @@ std::string DocumentUri::getPath() const {
     ret[0] = toupper(ret[0]);
   }
 #endif
-  if (g_config)
-    normalizeFolder(ret);
+  // NOTE(jerry) nvim lsp use 'nvim_buf_get_name' to get full path
+  // name of a buffer, which may refer to a path outside project especailly
+  // in bazel project with virtual includes
+  if (!g_config || normalizeFolder(ret)) return ret;
+  std::string ret2 = realPath(ret);
+  if (normalizeFolder(ret2)) return ret2;
   return ret;
 }
 
